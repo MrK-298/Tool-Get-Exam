@@ -1,11 +1,16 @@
+
 ﻿using APITool.Data;
 using MongoDB.Bson;
 using OpenQA.Selenium;
+
 
 namespace APITool.Function
 {
     public class FindExam
     {
+
+        public int count = 0;
+
         private readonly ExamManager _examManager;
         public IWebDriver updateDriver;
         public FindExam(ExamManager examManager)
@@ -52,7 +57,80 @@ namespace APITool.Function
                     break;
                 }
             }
+
+            GetPart5(newID);
+        }
+        public void GetPart5(ObjectId examId)
+        {
+            var examElements = updateDriver.FindElements(By.CssSelector(".leave-site"));
+            foreach (var examElement in examElements)
+            {
+                var examName = examElement.FindElement(By.CssSelector(".item-course-test .number")).Text;
+                if (_examManager.findExamById(examId).name == examName)
+                {
+                    IWebElement button4 = examElement.FindElement(By.CssSelector(".item-course-test .number"));
+                    button4.Click();
+                    Thread.Sleep(1000);
+                    IWebElement button6 = updateDriver.FindElement(By.XPath("//*[@id=\"leave-test-modal\"]/div/div/div/a/button"));
+                    button6.Click();
+                    Thread.Sleep(1000);
+                    break;
+                }
+            }
+            var questionAnswerItems = updateDriver.FindElements(By.CssSelector(".quiz-answer-item"));
+            foreach (var questionAnswerItem in questionAnswerItems)
+            {
+                count++;
+                var question = questionAnswerItem.FindElement(By.CssSelector(".question-name")).Text;
+                var answers = questionAnswerItem.FindElements(By.CssSelector(".anwser-item"));
+                List<Answer> answersList = new List<Answer>();
+                foreach (var answer in answers)
+                {
+                    var answerText = answer.FindElement(By.CssSelector("div")).Text.Trim();
+                    var answerStatusElement = answer.FindElement(By.CssSelector(".result-anwser"));
+                    var answerStatus = answerStatusElement.GetAttribute("value");
+                    bool isCorrect = answerStatus == "Y";
+                    var answerDB = new Answer
+                    {
+                        Id = ObjectId.GenerateNewId(),
+                        text = answerText,
+                        isTrue = isCorrect
+                    };
+                    answersList.Add(answerDB);
+                }
+                var questionDB = new Question
+                {
+                    Id = ObjectId.GenerateNewId(),
+                    type = "Part 5",
+                    questionText = question,
+                    Answers = answersList
+                };
+                _examManager.AddQuestionToExam(questionDB, examId);
+                IWebElement button5 = updateDriver.FindElement(By.XPath("//*[@id=\"next-question\"]"));
+                button5.Click();
+                if (count == 30)
+                {
+                    IWebElement button8 = updateDriver.FindElement(By.XPath("/html/body/div[2]/div[2]/div[1]/div[1]/div/a[4]"));
+                    button8.Click();
+                    Thread.Sleep(1000);
+                    IWebElement button6 = updateDriver.FindElement(By.XPath("//*[@id=\"leave-test-modal\"]/div/div/div/a/button"));
+                    button6.Click();
+                    Thread.Sleep(1000);
+                    IWebElement button7 = updateDriver.FindElement(By.XPath("//*[@id=\"sidebar_sub_menu_16519\"]/li[7]/a"));
+                    button7.Click();
+                    Thread.Sleep(1000);
+                    IWebElement button4 = updateDriver.FindElement(By.XPath("//*[@id=\"main-content\"]/div[2]/div/div/div[1]/div[1]/a"));
+                    button4.Click();
+                    Console.WriteLine("Success");
+                    return;
+                }
+            }
+        }
+     }
+  }
+
         }
     }
 
 }
+
