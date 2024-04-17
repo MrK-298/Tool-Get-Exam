@@ -4,12 +4,13 @@ using MongoDB.Bson;
 using OpenQA.Selenium;
 
 
-
 namespace APITool.Function
 {
     public class FindExam
     {
+
         public int count = 0;
+
         private readonly ExamManager _examManager;
         public IWebDriver updateDriver;
         public FindExam(ExamManager examManager)
@@ -56,6 +57,7 @@ namespace APITool.Function
                     break;
                 }
             }
+
             GetPart5(newID);
         }
         public void GetPart5(ObjectId examId)
@@ -126,4 +128,9 @@ namespace APITool.Function
         }
      }
   }
+
+        }
+    }
+
+}
 
