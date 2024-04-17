@@ -1,6 +1,9 @@
+
 ﻿using APITool.Data;
 using MongoDB.Bson;
 using OpenQA.Selenium;
+
+
 
 namespace APITool.Function
 {
@@ -53,6 +56,7 @@ namespace APITool.Function
                     break;
                 }
             }
+            GetPart5(newID);
         }
         public void GetPart5(ObjectId examId)
         {
@@ -120,7 +124,6 @@ namespace APITool.Function
                 }
             }
         }
-    }
-
-
+     }
+  }
 }
