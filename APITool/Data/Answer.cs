@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 
-namespace ConsoleApp1.Data
+namespace APITool.Data
 {
     public class Answer
     {
