@@ -53,6 +53,7 @@ namespace APITool.Function
                     break;
                 }
             }
+            GetPart5(newID);
         }
         public void GetPart5(ObjectId examId)
         {
