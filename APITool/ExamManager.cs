@@ -37,5 +37,25 @@ namespace APITool
             _examCollection.UpdateOne(filter, update);
             questionId = question.Id;
         }
+        public void AddSubquestionToQuestion(SubQuestion subquestion, ObjectId examId)
+        {
+            var filter = Builders<Exam>.Filter.And(
+                Builders<Exam>.Filter.Eq("_id", examId),
+                Builders<Exam>.Filter.ElemMatch(x => x.Questions, q => q.Id == questionId)
+            );
+            var update = Builders<Exam>.Update.Push("Questions.$.SubQuestions", subquestion);
+            _examCollection.UpdateOne(filter, update);
+        }
+        public void AddAnswersToQuestion(List<Answer> answers, ObjectId examId)
+        {
+            var filter = Builders<Exam>.Filter.And(
+                Builders<Exam>.Filter.Eq("_id", examId),
+                Builders<Exam>.Filter.ElemMatch(x => x.Questions, q => q.Id == questionId)
+            );
+
+            var update = Builders<Exam>.Update.PushEach("Questions.$.Answers", answers);
+
+            _examCollection.UpdateOne(filter, update);
+        }
     }
 }
