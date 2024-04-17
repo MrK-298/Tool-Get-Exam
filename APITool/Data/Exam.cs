@@ -11,6 +11,7 @@ namespace APITool.Data
     {
         public ObjectId Id { get; set; }
         public string name { get; set; }
+        public bool isDelete { get; set; }
         public List<Question> Questions { get; set; }
     }
 }
