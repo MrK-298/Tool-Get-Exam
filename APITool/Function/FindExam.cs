@@ -2,14 +2,17 @@
 ﻿using APITool.Data;
 using MongoDB.Bson;
 using OpenQA.Selenium;
-
+using System.Net;
+using static System.Net.Mime.MediaTypeNames;
 
 
 namespace APITool.Function
 {
     public class FindExam
     {
+
         public int count = 0;
+
         private readonly ExamManager _examManager;
         public IWebDriver updateDriver;
         public FindExam(ExamManager examManager)
@@ -57,6 +60,7 @@ namespace APITool.Function
                 }
             }
             GetPart5(newID);
+            GetPart7(newID);
         }
         public void GetPart5(ObjectId examId)
         {
@@ -124,6 +128,117 @@ namespace APITool.Function
                 }
             }
         }
-     }
-  }
-}
+        public void GetPart7(ObjectId examId)
+        {
+            var examElements = updateDriver.FindElements(By.CssSelector(".leave-site"));
+            foreach (var examElement in examElements)
+            {
+                var examName = examElement.FindElement(By.CssSelector(".item-course-test .number")).Text;
+                if (_examManager.findExamById(examId).name == examName)
+                {
+                    IWebElement button4 = examElement.FindElement(By.CssSelector(".item-course-test .number"));
+                    button4.Click();
+                    Thread.Sleep(1000);
+                    IWebElement button6 = updateDriver.FindElement(By.XPath("//*[@id=\"leave-test-modal\"]/div/div/div/a/button"));
+                    button6.Click();
+                    break;
+                }
+            }
+            int newCount = 0;
+            if (count == 84)
+            {
+                Console.WriteLine("Success");
+                return;
+            }
+            else
+            {
+                var questionAnswerItems = updateDriver.FindElements(By.CssSelector(".quiz-answer-item"));
+                foreach (var questionAnswerItem in questionAnswerItems)
+                {
+                    IReadOnlyCollection<IWebElement> imageElements = questionAnswerItem.FindElements(By.CssSelector(".question-name img"));
+                    if (imageElements.Count > 0)
+                    {
+                        List<SubQuestion> subQuestions = new List<SubQuestion>();
+                        count++;
+                        newCount++;
+                        var question = questionAnswerItem.FindElement(By.CssSelector(".question-name h4")).Text;
+                        var imageDiv = questionAnswerItem.FindElement(By.CssSelector(".question-name img"));
+                        string xpath = "//*[@id=\"test-course\"]/div[" + newCount + "]/div[2]/div/div/div";
+                        var exam = _examManager.findExamById(examId);
+                        string path = "Part7_exam" + exam.name + "_cau" + newCount;
+                        string imageUrl = imageDiv.GetAttribute("src");
+                        string localImagePath = @"C:\xampp\htdocs\webtienganh\images\" + path + ".png";
+                        WebClient client = new WebClient();
+                        client.DownloadFile(imageUrl, localImagePath);
+                        var questionSubElement = questionAnswerItem.FindElement(By.XPath(xpath)).Text;
+                        var answers = questionAnswerItem.FindElements(By.CssSelector(".anwser-item"));
+                        List<Answer> answersList = new List<Answer>();
+                        foreach (var answer in answers)
+                        {
+                            var answerText = answer.FindElement(By.CssSelector("div")).Text.Trim();
+                            var answerStatusElement = answer.FindElement(By.CssSelector(".result-anwser"));
+                            var answerStatus = answerStatusElement.GetAttribute("value");
+                            bool isCorrect = answerStatus == "Y";
+                            var answerDB = new Answer
+                            {
+                                Id = ObjectId.GenerateNewId(),
+                                text = answerText,
+                                isTrue = isCorrect
+                            };
+                            answersList.Add(answerDB);
+                        }
+                        var subquestionDB = new SubQuestion
+                        {
+                            Id = ObjectId.GenerateNewId(),
+                            text = questionSubElement,
+                            Answers = answersList
+                        };
+                        subQuestions.Add(subquestionDB);
+                        var questionDB = new Question
+                        {
+                            Id = ObjectId.GenerateNewId(),
+                            type = "Part 7",
+                            questionText = question,
+                            imageUrl = "../Images/" + path + ".png",
+                            SubQuestions = subQuestions
+                        };
+                        _examManager.AddQuestionToExam(questionDB, examId);
+                        IWebElement button5 = updateDriver.FindElement(By.XPath("//*[@id=\"next-question\"]"));
+                        button5.Click();
+                    }
+                    else
+                    {
+                        count++;
+                        newCount++;
+                        var question = questionAnswerItem.FindElement(By.CssSelector(".question-name")).Text;
+                        List<Answer> answersList = new List<Answer>();
+                        var answers = questionAnswerItem.FindElements(By.CssSelector(".anwser-item"));
+                        foreach (var answer in answers)
+                        {
+                            var answerText = answer.FindElement(By.CssSelector("div")).Text.Trim();
+                            var answerStatusElement = answer.FindElement(By.CssSelector(".result-anwser"));
+                            var answerStatus = answerStatusElement.GetAttribute("value");
+                            bool isCorrect = answerStatus == "Y";
+                            var answerDB = new Answer
+                            {
+                                Id = ObjectId.GenerateNewId(),
+                                text = answerText,
+                                isTrue = isCorrect
+                            };
+                            answersList.Add(answerDB);
+                        }
+                        var subquestionDB = new SubQuestion
+                        {
+                            Id = ObjectId.GenerateNewId(),
+                            text = $"{newCount}. {question}",
+                            Answers = answersList
+                        };
+                        _examManager.AddSubquestionToQuestion(subquestionDB, examId);
+                        IWebElement button5 = updateDriver.FindElement(By.XPath("//*[@id=\"next-question\"]"));
+                        button5.Click();
+                    }
+                }
+            }
+        }
+    }
+  }     
