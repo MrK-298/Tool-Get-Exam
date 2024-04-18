@@ -16,7 +16,7 @@ namespace APITool.Controllers
         {
             _examManager = examManager;
         }
-        [HttpPost]
+        [HttpPost("NewExam")]
         public IActionResult NewExam()
         {
             using (IWebDriver driver = new ChromeDriver())
