@@ -1,4 +1,6 @@
-﻿using APITool.Data;
+﻿using APITool.Data.Config;
+using APITool.Data.Table;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -8,11 +10,13 @@ namespace APITool
     {
         private readonly IMongoCollection<Exam> _examCollection;
         public ObjectId questionId;
-        public ExamManager()
+        private readonly MongoDBSettings _mongoSettings;
+        public ExamManager(IOptions<MongoDBSettings> mongoSettings)
         {
-            var client = new MongoClient("mongodb+srv://khoinguyen29082002:khoibia123@hoangkhoi.9ehzu5m.mongodb.net/");
-            var database = client.GetDatabase("WebTiengAnh");
-            _examCollection = database.GetCollection<Exam>("Exam");
+            _mongoSettings = mongoSettings.Value;
+            var client = new MongoClient(_mongoSettings.client);
+            var database = client.GetDatabase(_mongoSettings.database);
+            _examCollection = database.GetCollection<Exam>(_mongoSettings.collection);
         }
         public void AddExam(Exam exam)
         {

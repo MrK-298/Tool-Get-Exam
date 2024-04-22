@@ -1,4 +1,7 @@
 using APITool;
+using APITool.Data.Config;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +16,9 @@ builder.Services.AddCors(options =>
                    .AllowAnyMethod();
         });
 });
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("MyConfiguration:EmailSettings"));
+builder.Services.Configure<MongoDBSettings>(builder.Configuration.GetSection("MyConfiguration:MongoDBSettings"));
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
