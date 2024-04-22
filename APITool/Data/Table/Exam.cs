@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace APITool.Data
+namespace APITool.Data.Table
 {
     public class Exam
     {
