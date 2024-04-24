@@ -1,6 +1,6 @@
 <h1 align="center">Hi 👋, I'm Khoi</h1>
 - 📫 How to reach me **khoinguyen29082002@gmail.com**
-
+<h3 align="left">In my project , I used Selenium.WebDriver to handle Web Element and get content in Exam</h3>
 <h3 align="left">To use my project you just install my project and run api</h3>
 <p align="left"></p>
 
